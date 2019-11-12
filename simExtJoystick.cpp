@@ -1,6 +1,6 @@
 #include <Windows.h>
 #include "scriptFunctionData.h"
-#include "v_repLib.h"
+#include "simLib.h"
 #include <iostream>
 #include <dinput.h>
 #include <shlwapi.h> // for the "PathRemoveFileSpec" function
@@ -9,7 +9,7 @@
 #pragma comment(lib,"dxguid.lib")
 #pragma comment(lib, "Shlwapi.lib")
 
-#define VREP_DLLEXPORT extern "C" __declspec(dllexport)
+#define SIM_DLLEXPORT extern "C" __declspec(dllexport)
 
 #define CONCAT(x,y,z) x y z
 #define strConCat(x,y,z)    CONCAT(x,y,z)
@@ -25,7 +25,7 @@ DIJOYSTATE2 joystickStates[4];
 int currentDeviceIndex=0;
 int joystickCount=0;
 
-LIBRARY vrepLib;
+LIBRARY simLib;
 
 BOOL CALLBACK enumCallback(const DIDEVICEINSTANCE* instance, VOID* context)
 {
@@ -269,36 +269,36 @@ void LUA_GETDATA_CALLBACK(SScriptCallBack* cb)
 
 
 
-VREP_DLLEXPORT unsigned char v_repStart(void* reservedPointer,int reservedInt)
-{ // This is called just once, at the start of V-REP
+SIM_DLLEXPORT unsigned char simStart(void* reservedPointer,int reservedInt)
+{ // This is called just once, at the start of CoppeliaSim
 
-    // Dynamically load and bind V-REP functions:
+    // Dynamically load and bind CoppeliaSim functions:
     char curDirAndFile[1024];
     GetModuleFileName(NULL,curDirAndFile,1023);
     PathRemoveFileSpec(curDirAndFile);
     std::string currentDirAndPath(curDirAndFile);
     std::string temp(currentDirAndPath);
-    temp+="\\v_rep.dll";
-    vrepLib=loadVrepLibrary(temp.c_str());
-    if (vrepLib==NULL)
+    temp+="\\coppeliaSim.dll";
+    simLib=loadSimLibrary(temp.c_str());
+    if (simLib==NULL)
     {
-        std::cout << "Error, could not find or correctly load v_rep.dll. Cannot start 'Joystick' plugin.\n";
-        return(0); // Means error, V-REP will unload this plugin
+        std::cout << "Error, could not find or correctly load coppeliaSim.dll. Cannot start 'Joystick' plugin.\n";
+        return(0); // Means error, CoppeliaSim will unload this plugin
     }
-    if (getVrepProcAddresses(vrepLib)==0)
+    if (getSimProcAddresses(simLib)==0)
     {
-        std::cout << "Error, could not find all required functions in v_rep.dll. Cannot start 'Joystick' plugin.\n";
-        unloadVrepLibrary(vrepLib);
-        return(0); // Means error, V-REP will unload this plugin
+        std::cout << "Error, could not find all required functions in coppeliaSim.dll. Cannot start 'Joystick' plugin.\n";
+        unloadSimLibrary(simLib);
+        return(0); // Means error, CoppeliaSim will unload this plugin
     }
 
-	int vrepVer, vrepRev;
-	simGetIntegerParameter(sim_intparam_program_version, &vrepVer);
-	simGetIntegerParameter(sim_intparam_program_revision, &vrepRev);
-	if ((vrepVer<30400) || ((vrepVer == 30400) && (vrepRev<9)))
+	int simVer, simRev;
+	simGetIntegerParameter(sim_intparam_program_version, &simVer);
+	simGetIntegerParameter(sim_intparam_program_revision, &simRev);
+	if ((simVer<30400) || ((simVer == 30400) && (simRev<9)))
 	{
-		std::cout << "Sorry, your V-REP copy is somewhat old, V-REP 3.4.0 rev9 or higher is required. Cannot start 'Joystick' plugin.\n";
-		unloadVrepLibrary(vrepLib);
+		std::cout << "Sorry, your CoppeliaSim copy is somewhat old, CoppeliaSim 3.4.0 rev9 or higher is required. Cannot start 'Joystick' plugin.\n";
+		unloadSimLibrary(simLib);
 		return(0);
 	}
 
@@ -316,17 +316,17 @@ VREP_DLLEXPORT unsigned char v_repStart(void* reservedPointer,int reservedInt)
 
 
     return(3);  // initialization went fine, return the version number of this plugin!
-                // version 2 was for V-REP 2.5.12 or earlier
+                // version 2 was for CoppeliaSim 2.5.12 or earlier
 }
 
-VREP_DLLEXPORT void v_repEnd()
-{ // This is called just once, at the end of V-REP
+SIM_DLLEXPORT void simEnd()
+{ // This is called just once, at the end of CoppeliaSim
     // Release resources here..
     killThreadIfNeeded();
-    unloadVrepLibrary(vrepLib); // release the library
+    unloadSimLibrary(simLib); // release the library
 }
 
-VREP_DLLEXPORT void* v_repMessage(int message,int* auxiliaryData,void* customData,int* replyData)
+SIM_DLLEXPORT void* simMessage(int message,int* auxiliaryData,void* customData,int* replyData)
 { // This is called quite often. Just watch out for messages/events you want to handle
     // This function should not generate any error messages:
     int errorModeSaved;
@@ -336,7 +336,7 @@ VREP_DLLEXPORT void* v_repMessage(int message,int* auxiliaryData,void* customDat
     void* retVal=NULL;
 
     if (message==sim_message_eventcallback_instancepass)
-    { // It is important to always correctly react to events in V-REP. This message is the most convenient way to do so:
+    { // It is important to always correctly react to events in CoppeliaSim. This message is the most convenient way to do so:
 
         int flags=auxiliaryData[0];
         bool sceneContentChanged=((flags&(1+2+4+8+16+32+64+256))!=0); // object erased, created, model or scene loaded, und/redo called, instance switched, or object scaled since last sim_message_eventcallback_instancepass message 
