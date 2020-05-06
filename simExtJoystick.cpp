@@ -27,6 +27,19 @@ int joystickCount=0;
 
 LIBRARY simLib;
 
+bool canOutputMsg(int msgType)
+{
+    int plugin_verbosity = sim_verbosity_default;
+    simGetModuleInfo("Joystick",sim_moduleinfo_verbosity,nullptr,&plugin_verbosity);
+    return(plugin_verbosity>=msgType);
+}
+
+void outputMsg(int msgType,const char* msg)
+{
+    if (canOutputMsg(msgType))
+        printf("%s\n",msg);
+}
+
 BOOL CALLBACK enumCallback(const DIDEVICEINSTANCE* instance, VOID* context)
 {
     HRESULT hr;
@@ -64,7 +77,7 @@ DWORD WINAPI _joyThread(LPVOID lpParam)
     if (FAILED(hr = DirectInput8Create(GetModuleHandle(NULL), DIRECTINPUT_VERSION, 
                                    IID_IDirectInput8, (VOID**)&di, NULL)))
     {
-        printf("Failed initializing DirectInput library.\n");
+        outputMsg(sim_verbosity_errors,"simExtJoystick plugin error: failed initializing DirectInput library.");
         _joyThreadEnded=true;
         _inJoyThread=false;
         return(0);
@@ -74,7 +87,7 @@ DWORD WINAPI _joyThread(LPVOID lpParam)
     if (FAILED(hr = di->EnumDevices(DI8DEVCLASS_GAMECTRL, enumCallback,
                                 NULL, DIEDFL_ATTACHEDONLY)))
     {
-        printf("Failed enumerating devices.\n");
+        outputMsg(sim_verbosity_errors,"simExtJoystick plugin error: failed enumerating devices.");
         _joyThreadEnded=true;
         _inJoyThread=false;
         return(0);
@@ -100,18 +113,18 @@ DWORD WINAPI _joyThread(LPVOID lpParam)
         if (joysticks[i]!=NULL)
         {
             if (FAILED(hr = joysticks[i]->SetDataFormat(&c_dfDIJoystick2))) 
-                printf("Failed at 'SetDataFormat'.\n");
+                outputMsg(sim_verbosity_errors,"simExtJoystick plugin error: failed at 'SetDataFormat'.");
 
             if (FAILED(hr = joysticks[i]->SetCooperativeLevel(NULL, DISCL_EXCLUSIVE | DISCL_FOREGROUND)))
                ;// do not output an error here!      printf("Failed at 'SetCooperativeLevel'.\n");
 
             capabilities[i].dwSize = sizeof(DIDEVCAPS);
             if (FAILED(hr = joysticks[i]->GetCapabilities(&capabilities[i])))
-                printf("Failed at 'GetCapabilities'.\n");
+                outputMsg(sim_verbosity_errors,"simExtJoystick plugin error: failed at 'GetCapabilities'.");
 
             currentDeviceIndex=i;
             if (FAILED(hr = joysticks[i]->EnumObjects(enumAxesCallback, NULL, DIDFT_AXIS)))
-                printf("Failed at 'EnumObjects'.\n");
+                outputMsg(sim_verbosity_errors,"simExtJoystick plugin error: failed at 'EnumObjects'.");
         }
     }
     joyGoodToRead=true;
@@ -132,7 +145,7 @@ DWORD WINAPI _joyThread(LPVOID lpParam)
 
                     if ((hr == DIERR_INVALIDPARAM) || (hr == DIERR_NOTINITIALIZED))
                     {
-                        printf("Fatal error\n");
+                        outputMsg(sim_verbosity_errors,"simExtJoystick plugin error: fatal error.");
                         cont=false;
                     }
 
@@ -145,7 +158,7 @@ DWORD WINAPI _joyThread(LPVOID lpParam)
                 if (cont)
                 {
                     if (FAILED(hr = joysticks[i]->GetDeviceState(sizeof(DIJOYSTATE2), &joystickStates[i])))
-                        printf("Failed at 'GetDeviceState'\n");
+                        outputMsg(sim_verbosity_errors,"simExtJoystick plugin error: failed at 'GetDeviceState'.");
                 }
             }
         }
@@ -282,25 +295,15 @@ SIM_DLLEXPORT unsigned char simStart(void* reservedPointer,int reservedInt)
     simLib=loadSimLibrary(temp.c_str());
     if (simLib==NULL)
     {
-        std::cout << "Error, could not find or correctly load coppeliaSim.dll. Cannot start 'Joystick' plugin.\n";
+        outputMsg(sim_verbosity_errors,"simExtJoystick plugin error: could not find or correctly load coppeliaSim.dll. Cannot start 'Joystick' plugin.");
         return(0); // Means error, CoppeliaSim will unload this plugin
     }
     if (getSimProcAddresses(simLib)==0)
     {
-        std::cout << "Error, could not find all required functions in coppeliaSim.dll. Cannot start 'Joystick' plugin.\n";
+        outputMsg(sim_verbosity_errors,"simExtJoystick plugin error: could not find all required functions in coppeliaSim.dll. Cannot start 'Joystick' plugin.");
         unloadSimLibrary(simLib);
         return(0); // Means error, CoppeliaSim will unload this plugin
     }
-
-	int simVer, simRev;
-	simGetIntegerParameter(sim_intparam_program_version, &simVer);
-	simGetIntegerParameter(sim_intparam_program_revision, &simRev);
-	if ((simVer<30400) || ((simVer == 30400) && (simRev<9)))
-	{
-		std::cout << "Sorry, your CoppeliaSim copy is somewhat old, CoppeliaSim 3.4.0 rev9 or higher is required. Cannot start 'Joystick' plugin.\n";
-		unloadSimLibrary(simLib);
-		return(0);
-	}
 
 	simRegisterScriptVariable("simJoy", "require('simExtJoystick')", 0);
 

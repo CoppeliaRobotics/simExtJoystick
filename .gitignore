@@ -1,6 +1,7 @@
 .qmake.stash
 Makefile
 *.o
+*.user
 Makefile.Debug
 Makefile.Release
 object_script.*.Debug
