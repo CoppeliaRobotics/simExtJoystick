@@ -292,8 +292,6 @@ SIM_DLLEXPORT unsigned char simStart(void* reservedPointer,int reservedInt)
         return(0); // Means error, CoppeliaSim will unload this plugin
     }
 
-	simRegisterScriptVariable("simJoy", "require('simExtJoystick')", 0);
-
 	// Register the new functions:
 	simRegisterScriptCallbackFunction(strConCat(LUA_GETCOUNT, "@", "Joystick"), strConCat("number count=", LUA_GETCOUNT, "()"), LUA_GETCOUNT_CALLBACK);
 	simRegisterScriptCallbackFunction(strConCat(LUA_GETDATA, "@", "Joystick"), strConCat("table_3 axes, number buttons,table_3 rotAxes,table_2 slider,table_4 pov=", LUA_GETDATA, "(number deviceIndex)"), LUA_GETDATA_CALLBACK);
