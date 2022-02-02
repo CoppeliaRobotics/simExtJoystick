@@ -293,8 +293,8 @@ SIM_DLLEXPORT unsigned char simStart(void* reservedPointer,int reservedInt)
     }
 
 	// Register the new functions:
-	simRegisterScriptCallbackFunction(strConCat(LUA_GETCOUNT, "@", "Joystick"), strConCat("number count=", LUA_GETCOUNT, "()"), LUA_GETCOUNT_CALLBACK);
-	simRegisterScriptCallbackFunction(strConCat(LUA_GETDATA, "@", "Joystick"), strConCat("table_3 axes, number buttons,table_3 rotAxes,table_2 slider,table_4 pov=", LUA_GETDATA, "(number deviceIndex)"), LUA_GETDATA_CALLBACK);
+	simRegisterScriptCallbackFunction(strConCat(LUA_GETCOUNT, "@", "Joystick"), strConCat("int count=", LUA_GETCOUNT, "()"), LUA_GETCOUNT_CALLBACK);
+	simRegisterScriptCallbackFunction(strConCat(LUA_GETDATA, "@", "Joystick"), strConCat("table_3 axes, int buttons,table_3 rotAxes,table_2 slider,table_4 pov=", LUA_GETDATA, "(int deviceIndex)"), LUA_GETDATA_CALLBACK);
 	
 	// Following for backward compatibility:
 	simRegisterScriptVariable(LUA_GETCOUNTOLD, LUA_GETCOUNT, -1);
