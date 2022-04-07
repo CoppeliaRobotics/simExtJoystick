@@ -294,7 +294,7 @@ SIM_DLLEXPORT unsigned char simStart(void* reservedPointer,int reservedInt)
 
 	// Register the new functions:
 	simRegisterScriptCallbackFunction(strConCat(LUA_GETCOUNT, "@", "Joystick"), strConCat("int count=", LUA_GETCOUNT, "()"), LUA_GETCOUNT_CALLBACK);
-	simRegisterScriptCallbackFunction(strConCat(LUA_GETDATA, "@", "Joystick"), strConCat("table_3 axes, int buttons,table_3 rotAxes,table_2 slider,table_4 pov=", LUA_GETDATA, "(int deviceIndex)"), LUA_GETDATA_CALLBACK);
+	simRegisterScriptCallbackFunction(strConCat(LUA_GETDATA, "@", "Joystick"), strConCat("int[3] axes, int buttons,int[3] rotAxes,int[3] slider,int[4] pov=", LUA_GETDATA, "(int deviceIndex)"), LUA_GETDATA_CALLBACK);
 	
 	// Following for backward compatibility:
 	simRegisterScriptVariable(LUA_GETCOUNTOLD, LUA_GETCOUNT, -1);
@@ -303,8 +303,8 @@ SIM_DLLEXPORT unsigned char simStart(void* reservedPointer,int reservedInt)
 	simRegisterScriptCallbackFunction(strConCat(LUA_GETDATAOLD, "@", "Joystick"), strConCat("Please use the ", LUA_GETDATA, " notation instead"), 0);
 
 
-    return(3);  // initialization went fine, return the version number of this plugin!
-                // version 2 was for CoppeliaSim 2.5.12 or earlier
+    return(4);  // initialization went fine, return the version number of this plugin!
+                // version 3 was for CoppeliaSim 4.3 or earlier
 }
 
 SIM_DLLEXPORT void simEnd()
