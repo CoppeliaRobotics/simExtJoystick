@@ -1,6 +1,6 @@
 #include <Windows.h>
-#include <scriptFunctionData.h>
-#include <simLib.h>
+#include <simLib/scriptFunctionData.h>
+#include <simLib/simLib.h>
 #include <iostream>
 #include <dinput.h>
 #include <shlwapi.h> // for the "PathRemoveFileSpec" function

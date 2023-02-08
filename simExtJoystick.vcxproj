@@ -39,7 +39,7 @@
       <MkTypLibCompatible>false</MkTypLibCompatible>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>..\include; ..\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -68,13 +68,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\common\scriptFunctionData.cpp">
+    <ClCompile Include="..\include\simLib\scriptFunctionData.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\common\scriptFunctionDataItem.cpp">
+    <ClCompile Include="..\include\simLib\scriptFunctionDataItem.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\common\simLib.cpp">
+    <ClCompile Include="..\include\simLib\simLib.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="simExtJoystick.cpp">
@@ -82,9 +82,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\scriptFunctionData.h" />
-    <ClInclude Include="..\include\scriptFunctionDataItem.h" />
-    <ClInclude Include="..\include\simLib.h" />
+    <ClInclude Include="..\include\simLib\scriptFunctionData.h" />
+    <ClInclude Include="..\include\simLib\scriptFunctionDataItem.h" />
+    <ClInclude Include="..\include\simLib\simLib.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
